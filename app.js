@@ -31,28 +31,50 @@ app.get('/',
 		res.redirect('wicg-updates');
 	});
 
+app.get('/wicg-updates.json',
+	function(req, res) {
+	  	getWicgData().then(data => {
+	  		res.set('Content-Type', 'application/json');
+	  		res.json(data);
+	  	}).catch(err => {
+	  		console.error('Error ' + err);
+	  	});
+	});
+
 app.get('/wicg-updates',
   function(req, res) {
-  	dataCache.get('updates',(err,data)=>{
-  		if(!err && data) {
-  			// data came from cache - render page
-  			data.markdown = markdown;
-		    res.render('home', data);
-  		} else {
-  			// data is not in cache - retrieve from GitHub
-  			const DAYS45 = 1000 * 60 * 60 * 24 * 45; // ms in 45 days
-			var since = new Date(Date.now() - DAYS45).toISOString().substr(0,11) + "00:00:00Z"; //'2016-03-01T00:00:00';
-			wicgData.getRecentUpdates(since).then(results => {
-				// store in cache
-				data = { retrieved: Date.now(), contributions: results, since: since };
-				dataCache.set('updates', data);
-
-				// render page
-				data.markdown = markdown;
-			    res.render('home', data);
-			}).catch(err=>{ console.error('Error ' + err)});
-  		}
+  	getWicgData().then(data => {
+		data.markdown = markdown;
+	    res.render('home', data);
+  	}).catch(err => {
+  		console.error('Error ' + err);
   	});
   });
+
+function getWicgData(days) {
+	days = days || 45;
+	const cacheName = 'updates';
+	return new Promise((resolve,reject) => {
+	  	dataCache.get('updates',(err,data)=>{
+	  		if(!err && data) {
+	  			// data came from cache
+	  			resolve(data);
+	  		} else {
+	  			// data is not in cache - retrieve from GitHub
+	  			const DAY_IN_MS = 1000 * 60 * 60 * 24;
+				var since = new Date(Date.now() - (days*DAY_IN_MS)).toISOString().substr(0,11) + "00:00:00Z";
+
+				wicgData.getRecentUpdates(since).then(results => {
+					// store in cache
+					data = { retrieved: Date.now(), contributions: results, since: since };
+					dataCache.set('updates', data);
+					resolve(data);
+				}).catch(err=>{
+					reject(err);
+				});
+	  		}
+	  	});
+	});
+}
 
 app.listen(port);
