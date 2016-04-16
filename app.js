@@ -16,8 +16,6 @@ if(process.env.GITHUB_TOKEN) {
 
 var wicgData = require('./wicg-data')(config);
 
-var DAYS45 = 1000 * 60 * 60 * 24 * 45; // ms in 45 days
-
 var app = express();
 app.set('views', __dirname + '/views'); 
 app.set('view engine', 'ejs'); 
@@ -42,6 +40,7 @@ app.get('/wicg-updates',
 		    res.render('home', data);
   		} else {
   			// data is not in cache - retrieve from GitHub
+  			const DAYS45 = 1000 * 60 * 60 * 24 * 45; // ms in 45 days
 			var since = new Date(Date.now() - DAYS45).toISOString().substr(0,11) + "00:00:00Z"; //'2016-03-01T00:00:00';
 			wicgData.getRecentUpdates(since).then(results => {
 				// store in cache

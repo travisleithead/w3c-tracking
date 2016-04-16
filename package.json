@@ -1,9 +1,11 @@
 {
   "name": "wicg-info",
   "version": "1.0.0",
-  "description": "",
-  "main": "recent.js",
+  "main": "app.js",
   "private": "true",
+  "engines": {
+    "node": ">=5.1.0"
+  },
   "author": "Adrian Bateman",
   "dependencies": {
     "ejs": "^2.4.1",

@@ -4,7 +4,7 @@ var GitHubApi = require("github4");
 
 function WICGdata(config) {
 	config = config || {};
-	if(!config.microsoftAccounts) throw "Must provide microsoftAcounts";
+	if(!config.microsoftAccounts) throw "Must provide microsoftAccounts";
 
 	var _github = new GitHubApi({
 	    version: "3.0.0",
@@ -60,6 +60,8 @@ function WICGdata(config) {
 					}))
 				));
 			});
+
+			// Gather all the promises and then wait for them all to resolve
 			return Promise.all(pp).then(arr => {
 				var contributions = [];
 				arr.forEach(a => { Array.prototype.push.apply(contributions,a); });
@@ -67,17 +69,10 @@ function WICGdata(config) {
 				contributions.sort((a,b) => {
 					var ar = a.repo.toLowerCase();
 					var br = b.repo.toLowerCase();
-					if(ar===br) {
-						if(a.date < b.date) {
-							return -1;
-						} else if(a.date > b.date) {
-							return 1;
-						} else {
-							return 0;
-						}
-					} else {
-						return ar < br ? -1 : 1;
-					}
+					// sort by repo name and then by date
+					return ar===br ? (
+							a.date < b.date ? -1 : (a.date > b.date ? 1 : 0)
+						) : (ar < br ? -1 : 1);
 				});
 
 				return contributions;
