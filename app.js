@@ -34,7 +34,7 @@ app.get('/',
 app.get('/wicg-updates.json',
 	function(req, res) {
 	  	getWicgData().then(data => {
-	  		res.set('Content-Type', 'application/json');
+	  		res.type('application/json');
 	  		res.json(data);
 	  	}).catch(err => {
 	  		console.error('Error ' + err);
