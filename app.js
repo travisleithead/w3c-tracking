@@ -35,6 +35,7 @@ app.get('/wicg-updates.json',
 	function(req, res) {
 	  	getWicgData().then(data => {
 	  		res.type('application/json');
+	  		res.set('Access-Control-Allow-Origin','*');
 	  		res.json(data);
 	  	}).catch(err => {
 	  		console.error('Error ' + err);
