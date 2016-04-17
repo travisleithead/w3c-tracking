@@ -4,7 +4,7 @@ var port = process.env.PORT || 1337;
 
 var express = require('express');
 var NodeCache = require('node-cache');
-var markdown = require('markdown').markdown;
+var marked = require('marked');
 
 var config = {
 	microsoftAccounts: require("./microsoft-github-accounts.json").accounts
@@ -45,7 +45,7 @@ app.get('/wicg-updates.json',
 app.get('/wicg-updates',
   function(req, res) {
   	getWicgData().then(data => {
-		data.markdown = markdown;
+		data.marked = marked;
 	    res.render('home', data);
   	}).catch(err => {
   		console.error('Error ' + err);

@@ -21,7 +21,7 @@ blockquote { font-size:1em; }
 	    <td><a href="https://github.com/wicg/<%= c.repo %>"><%= c.repo %></a></td>
 	    <td><%= c.type %></td>
 	    <td nowrap><img src="<%= c.contributorImage %>" width="24"> <%= c.contributor %></td>
-	    <td><div><%- markdown.toHTML(c.message) %></div><div><a href="<%= c.url %>"><%= c.date %></a></div></td>
+	    <td><div><%- marked(c.message,{sanitize:true,gfm:true}) %></div><div><a href="<%= c.url %>"><%= c.date %></a></div></td>
     </tr>
   <% }); %>
   </tbody>
