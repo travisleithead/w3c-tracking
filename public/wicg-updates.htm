@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<!-- saved from url=(0014)about:internet -->
+<html>
+<head>
+<title>WICG Contributions</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.24/browser.js"></script>
+<script src="https://fb.me/react-with-addons-15.0.1.js"></script>
+<script src="https://fb.me/react-dom-15.0.1.js"></script>
+<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.2.3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.5/marked.min.js"></script>
+<link rel=stylesheet href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.6/css/bootstrap.min.css">
+<style>
+blockquote { font-size:1em; }
+.nowrap { white-space: nowrap; }
+</style>
+</head>
+<body style="margin:10px">
+
+<div id="container">
+    <!-- This element's contents will be replaced with your component. -->
+</div>
+
+<script type="text/babel">
+var TableHeadings = React.createClass({
+	render: function() {
+		return <thead><tr><th>Repo</th><th>Type</th><th>Contributor</th><th>Message</th></tr></thead>;
+	}
+});
+
+var TableRows = React.createClass({
+	getInitialState: function() {
+		return {data:null};
+	},
+	componentDidMount: function() {
+		this.serverRequest = $.get("https://w3c-tracking.azurewebsites.net/wicg-updates.json",function(result) {
+			this.setState({data:result});
+		}.bind(this));
+	},
+	componentWillUnmount: function() {
+		this.serverRequest.abort();
+	},
+	rawMarkdown: function(md) {
+		var rawMarkup = marked(md, {sanitize: true});
+		return { __html: rawMarkup };
+	},
+	render: function() {
+		if(this.state.data) {
+			var contribNodes = this.state.data.contributions.map(function(c) {
+				return <tr>
+				    <td><a href={'https://github.com/wicg/' + c.repo}>{c.repo}</a></td>
+				    <td>{c.type}</td>
+				    <td className="nowrap"><img src={c.contributorImage} width="24"/> {c.contributor}</td>
+				    <td><div dangerouslySetInnerHTML={this.rawMarkdown(c.message)} /><div><a href={c.url}>{c.date}</a></div></td>
+			    </tr>;
+			}.bind(this));
+			return <tbody><tr><td colSpan="4">
+				<div>Microsoft contributions to WICG since: {this.state.data.since}</div>
+				<div>Data retrieved from GitHub: {new Date(this.state.data.retrieved).toISOString()}</div>				
+			</td></tr>{contribNodes}</tbody>;
+		} else {
+			return <tbody><tr><td colSpan="4">Loading...</td></tr></tbody>;
+		}
+	}
+});
+
+var Table = React.createClass({
+  render: function() {
+    return <table className="table table-striped table-bordered"><TableHeadings/><TableRows/></table>;
+  }
+});
+
+ReactDOM.render(
+  <Table />,
+  document.getElementById('container')
+);
+</script>	
+</body>
+</html>
