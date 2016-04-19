@@ -1,5 +1,6 @@
 "use strict";
 
+var _ = require('lodash');
 var GitHubApi = require("github4");
 
 function WICGdata(config) {
@@ -19,8 +20,11 @@ function WICGdata(config) {
 		});
 	}
 
+	var _membersPromise = null;
+
 	this.getRecentUpdates = function(SINCE) {
-		return getRepos().then(repos => {
+		populateMicrosoftMembers();
+		return _membersPromise.then(() => getRepos().then(repos => {
 			var pp = [];
 			repos.forEach(repo => {
 				// Get all commits since SINCE and filter to only Microsoft authors or committers
@@ -77,7 +81,7 @@ function WICGdata(config) {
 
 				return contributions;
 			});
-		});
+		}));
 	};
 
 	function getRepos() {
@@ -123,6 +127,25 @@ function WICGdata(config) {
 					reject(err);
 				} else {
 					resolve(result);
+				}
+			});
+		});
+	}
+
+	function populateMicrosoftMembers() {
+		if(_membersPromise) return;
+		_membersPromise =  getOrgMembers('MicrosoftEdge').then(members => {
+			config.microsoftAccounts = _.union(config.microsoftAccounts,members);
+		});
+	}
+
+	function getOrgMembers(org) {
+		return new Promise((resolve,reject) => {
+			_github.orgs.getMembers({org:org},(err,result)=> {
+				if(err) {
+					reject(err);
+				} else {
+					resolve(result.map(member => member.login.toLowerCase()));
 				}
 			});
 		});
