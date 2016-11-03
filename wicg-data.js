@@ -86,7 +86,7 @@ function WICGdata(config) {
 
 	function getRepos() {
 		return new Promise((resolve,reject) => {
-			_github.repos.getForOrg({org:'wicg'},(err,result)=>{
+			_github.repos.getForOrg({org:'wicg',per_page:'100'},(err,result)=>{
 				if(err) {
 					reject(err);
 				} else {
@@ -98,7 +98,7 @@ function WICGdata(config) {
 
 	function getCommits(repo,since) {
 		return new Promise((resolve,reject) => {
-			_github.repos.getCommits({user:'wicg',repo:repo,since:since},(err,result)=> {
+			_github.repos.getCommits({user:'wicg',repo:repo,since:since,per_page:'100'},(err,result)=> {
 				if(err) {
 					reject(err);
 				} else {
@@ -110,7 +110,7 @@ function WICGdata(config) {
 
 	function getPRComments(repo,since) {
 		return new Promise((resolve,reject) => {
-			_github.pullRequests.getCommentsForRepo({user:'wicg',repo:repo,since:since},(err,result)=> {
+			_github.pullRequests.getCommentsForRepo({user:'wicg',repo:repo,since:since,per_page:'100'},(err,result)=> {
 				if(err) {
 					reject(err);
 				} else {
@@ -122,7 +122,7 @@ function WICGdata(config) {
 
 	function getIssueComments(repo,since) {
 		return new Promise((resolve,reject) => {
-			_github.issues.getCommentsForRepo({user:'wicg',repo:repo,since:since},(err,result)=> {
+			_github.issues.getCommentsForRepo({user:'wicg',repo:repo,since:since,per_page:'100'},(err,result)=> {
 				if(err) {
 					reject(err);
 				} else {
