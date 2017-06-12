@@ -1,20 +1,21 @@
 "use strict";
 
-var port = process.env.PORT || 1337;
+var port = process.env.PORT || 8880;
 
 var express = require('express');
 var NodeCache = require('node-cache');
 var marked = require('marked');
 
 var config = {
-	microsoftAccounts: require("./microsoft-github-accounts.json").accounts
+	microsoftAccounts: require("./microsoft-github-accounts.json").accounts,
+	org: 'wicg'
 };
 
 if(process.env.GITHUB_TOKEN) {
 	config.githubToken = process.env.GITHUB_TOKEN;
 }
 
-var wicgData = require('./wicg-data')(config);
+var ghData = require('./gh-data')(config);
 
 var app = express();
 app.set('views', __dirname + '/views'); 
@@ -33,7 +34,7 @@ app.get('/',
 
 app.get('/wicg-updates.json',
 	function(req, res) {
-	  	getWicgData().then(data => {
+	  	getGHData().then(data => {
 	  		res.type('application/json');
 	  		res.set('Access-Control-Allow-Origin','*');
 	  		res.json(data);
@@ -44,7 +45,7 @@ app.get('/wicg-updates.json',
 
 app.get('/wicg-updates',
   function(req, res) {
-  	getWicgData().then(data => {
+  	getGHData().then(data => {
 		data.marked = marked;
 	    res.render('home', data);
   	}).catch(err => {
@@ -52,7 +53,7 @@ app.get('/wicg-updates',
   	});
   });
 
-function getWicgData(days) {
+function getGHData(days) {
 	days = days || 45;
 	const cacheName = 'updates';
 	return new Promise((resolve,reject) => {
@@ -65,7 +66,7 @@ function getWicgData(days) {
 	  			const DAY_IN_MS = 1000 * 60 * 60 * 24;
 				var since = new Date(Date.now() - (days*DAY_IN_MS)).toISOString().substr(0,11) + "00:00:00Z";
 
-				wicgData.getRecentUpdates(since).then(results => {
+				ghData.getRecentUpdates(since).then(results => {
 					// store in cache
 					data = { retrieved: Date.now(), contributions: results, since: since };
 					dataCache.set('updates', data);

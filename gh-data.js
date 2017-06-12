@@ -3,9 +3,10 @@
 var _ = require('lodash');
 var GitHubApi = require("github4");
 
-function WICGdata(config) {
+function GitHubData(config) {
 	config = config || {};
 	if(!config.microsoftAccounts) throw "Must provide microsoftAccounts";
+	if(!config.org) config.org = "wicg";
 
 	var _github = new GitHubApi({
 	    version: "3.0.0",
@@ -86,7 +87,7 @@ function WICGdata(config) {
 
 	function getRepos() {
 		return new Promise((resolve,reject) => {
-			_github.repos.getForOrg({org:'wicg',per_page:'100'},(err,result)=>{
+			_github.repos.getForOrg({org:config.org,per_page:'100'},(err,result)=>{
 				if(err) {
 					reject(err);
 				} else {
@@ -98,7 +99,7 @@ function WICGdata(config) {
 
 	function getCommits(repo,since) {
 		return new Promise((resolve,reject) => {
-			_github.repos.getCommits({user:'wicg',repo:repo,since:since,per_page:'100'},(err,result)=> {
+			_github.repos.getCommits({user:config.org,repo:repo,since:since,per_page:'100'},(err,result)=> {
 				if(err) {
 					reject(err);
 				} else {
@@ -110,7 +111,7 @@ function WICGdata(config) {
 
 	function getPRComments(repo,since) {
 		return new Promise((resolve,reject) => {
-			_github.pullRequests.getCommentsForRepo({user:'wicg',repo:repo,since:since,per_page:'100'},(err,result)=> {
+			_github.pullRequests.getCommentsForRepo({user:config.org,repo:repo,since:since,per_page:'100'},(err,result)=> {
 				if(err) {
 					reject(err);
 				} else {
@@ -122,7 +123,7 @@ function WICGdata(config) {
 
 	function getIssueComments(repo,since) {
 		return new Promise((resolve,reject) => {
-			_github.issues.getCommentsForRepo({user:'wicg',repo:repo,since:since,per_page:'100'},(err,result)=> {
+			_github.issues.getCommentsForRepo({user:config.org,repo:repo,since:since,per_page:'100'},(err,result)=> {
 				if(err) {
 					reject(err);
 				} else {
@@ -171,5 +172,5 @@ function WICGdata(config) {
 };
 
 module.exports = function(config) {
-	return new WICGdata(config);
+	return new GitHubData(config);
 };
