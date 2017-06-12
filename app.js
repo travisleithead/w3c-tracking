@@ -7,8 +7,7 @@ var NodeCache = require('node-cache');
 var marked = require('marked');
 
 var config = {
-	microsoftAccounts: require("./microsoft-github-accounts.json").accounts,
-	org: 'wicg'
+	microsoftAccounts: require("./microsoft-github-accounts.json").accounts
 };
 
 if(process.env.GITHUB_TOKEN) {
@@ -34,7 +33,7 @@ app.get('/',
 
 app.get('/wicg-updates.json',
 	function(req, res) {
-	  	getGHData().then(data => {
+	  	getGHData('wicg').then(data => {
 	  		res.type('application/json');
 	  		res.set('Access-Control-Allow-Origin','*');
 	  		res.json(data);
@@ -45,19 +44,45 @@ app.get('/wicg-updates.json',
 
 app.get('/wicg-updates',
   function(req, res) {
-  	getGHData().then(data => {
+  	getGHData('wicg').then(data => {
 		data.marked = marked;
+		data.name = "WICG";
+		data.org = 'wicg';
 	    res.render('home', data);
   	}).catch(err => {
   		console.error('Error ' + err);
   	});
   });
 
-function getGHData(days) {
+app.get('/gpuweb-updates.json',
+	function(req, res) {
+	  	getGHData('gpuweb').then(data => {
+	  		res.type('application/json');
+	  		res.set('Access-Control-Allow-Origin','*');
+	  		res.json(data);
+	  	}).catch(err => {
+	  		console.error('Error ' + err);
+	  	});
+	});
+
+app.get('/gpuweb-updates',
+  function(req, res) {
+  	getGHData('gpuweb').then(data => {
+		data.marked = marked;
+		data.name = 'GPU for the Web';
+		data.org = 'gpuweb';
+	    res.render('home', data);
+  	}).catch(err => {
+  		console.error('Error ' + err);
+  	});
+  });
+
+function getGHData(org,days) {
+	org = org || 'wicg';
 	days = days || 45;
-	const cacheName = 'updates';
+	const cacheName = 'updates-' + org;
 	return new Promise((resolve,reject) => {
-	  	dataCache.get('updates',(err,data)=>{
+	  	dataCache.get(cacheName,(err,data)=>{
 	  		if(!err && data) {
 	  			// data came from cache
 	  			resolve(data);
@@ -66,10 +91,10 @@ function getGHData(days) {
 	  			const DAY_IN_MS = 1000 * 60 * 60 * 24;
 				var since = new Date(Date.now() - (days*DAY_IN_MS)).toISOString().substr(0,11) + "00:00:00Z";
 
-				ghData.getRecentUpdates(since).then(results => {
+				ghData.getRecentUpdates(org,since).then(results => {
 					// store in cache
 					data = { retrieved: Date.now(), contributions: results, since: since };
-					dataCache.set('updates', data);
+					dataCache.set(cacheName, data);
 					resolve(data);
 				}).catch(err=>{
 					reject(err);

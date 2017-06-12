@@ -6,7 +6,6 @@ var GitHubApi = require("github4");
 function GitHubData(config) {
 	config = config || {};
 	if(!config.microsoftAccounts) throw "Must provide microsoftAccounts";
-	if(!config.org) config.org = "wicg";
 
 	var _github = new GitHubApi({
 	    version: "3.0.0",
@@ -23,13 +22,13 @@ function GitHubData(config) {
 
 	var _membersPromise = null;
 
-	this.getRecentUpdates = function(SINCE) {
+	this.getRecentUpdates = function(org,SINCE) {
 		populateMicrosoftMembers();
-		return _membersPromise.then(() => getRepos().then(repos => {
+		return _membersPromise.then(() => getRepos(org).then(repos => {
 			var pp = [];
 			repos.forEach(repo => {
 				// Get all commits since SINCE and filter to only Microsoft authors or committers
-				pp.push(getCommits(repo.name,SINCE).then(commits => {
+				pp.push(getCommits(org,repo.name,SINCE).then(commits => {
 					var r1 = filterByMicrosoft(commits,c=>c.author && c.author.login ? c.author.login : "")
 						.map(c => mapCommit(c,'commit-author',repo.name,cc=>cc.author,cc=>cc.commit.author.date));
 					var r2 = filterByMicrosoft(commits,c=>c.committer && c.committer.login ? c.committer.login : "")
@@ -40,7 +39,7 @@ function GitHubData(config) {
 				}));
 
 				// Get all comments on pull requests since SINCE and filter to only Microsoft commenters
-				pp.push(getPRComments(repo.name,SINCE).then(comments => 
+				pp.push(getPRComments(org,repo.name,SINCE).then(comments => 
 					filterByMicrosoft(comments,c=>c.user.login).map(c => ({
 						type: 'pr-comment',
 						contributor: c.user.login,
@@ -53,7 +52,7 @@ function GitHubData(config) {
 				));
 
 				// Get all comments on issues since SINCE and filter to only Microsoft commenters
-				pp.push(getIssueComments(repo.name,SINCE).then(comments =>
+				pp.push(getIssueComments(org,repo.name,SINCE).then(comments =>
 					filterByMicrosoft(comments,c=>c.user.login).map(c => ({
 						type: 'issue-comment',
 						contributor: c.user.login,
@@ -85,9 +84,9 @@ function GitHubData(config) {
 		}));
 	};
 
-	function getRepos() {
+	function getRepos(org) {
 		return new Promise((resolve,reject) => {
-			_github.repos.getForOrg({org:config.org,per_page:'100'},(err,result)=>{
+			_github.repos.getForOrg({org:org,per_page:'100'},(err,result)=>{
 				if(err) {
 					reject(err);
 				} else {
@@ -97,9 +96,9 @@ function GitHubData(config) {
 		});
 	}
 
-	function getCommits(repo,since) {
+	function getCommits(org,repo,since) {
 		return new Promise((resolve,reject) => {
-			_github.repos.getCommits({user:config.org,repo:repo,since:since,per_page:'100'},(err,result)=> {
+			_github.repos.getCommits({user:org,repo:repo,since:since,per_page:'100'},(err,result)=> {
 				if(err) {
 					reject(err);
 				} else {
@@ -109,9 +108,9 @@ function GitHubData(config) {
 		});
 	}
 
-	function getPRComments(repo,since) {
+	function getPRComments(org,repo,since) {
 		return new Promise((resolve,reject) => {
-			_github.pullRequests.getCommentsForRepo({user:config.org,repo:repo,since:since,per_page:'100'},(err,result)=> {
+			_github.pullRequests.getCommentsForRepo({user:org,repo:repo,since:since,per_page:'100'},(err,result)=> {
 				if(err) {
 					reject(err);
 				} else {
@@ -121,9 +120,9 @@ function GitHubData(config) {
 		});
 	}
 
-	function getIssueComments(repo,since) {
+	function getIssueComments(org,repo,since) {
 		return new Promise((resolve,reject) => {
-			_github.issues.getCommentsForRepo({user:config.org,repo:repo,since:since,per_page:'100'},(err,result)=> {
+			_github.issues.getCommentsForRepo({user:org,repo:repo,since:since,per_page:'100'},(err,result)=> {
 				if(err) {
 					reject(err);
 				} else {

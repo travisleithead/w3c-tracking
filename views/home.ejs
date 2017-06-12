@@ -2,14 +2,15 @@
 <!-- saved from url=(0014)about:internet -->
 <html>
 <head>
-<title>WICG Contributions</title>
+<title><%= name%> Contributions</title>
 <link rel=stylesheet href="bootstrap.3.3.6.min.css">
 <style>
 blockquote { font-size:1em; }
 </style>
 </head>
 <body style="margin:10px;">
-<p>Microsoft contributions to WICG since: <%= since %></p>
+<p><a href="/wicg-updates">WICG</a> | <a href="/gpuweb-updates">GPU for the Web</a></p>
+<p>Microsoft contributions to <strong><%= name%></strong> since: <%= since %></p>
 <p>Data retrieved from GitHub: <%= new Date(retrieved).toISOString() %></p>
 <table class="table table-striped table-bordered">
   <thead>
@@ -18,7 +19,7 @@ blockquote { font-size:1em; }
   <tbody>
   <% contributions.forEach(c => { %>
     <tr>
-	    <td><a href="https://github.com/wicg/<%= c.repo %>"><%= c.repo %></a></td>
+	    <td><a href="https://github.com/<%= org%>/<%= c.repo %>"><%= c.repo %></a></td>
 	    <td><%= c.type %></td>
 	    <td nowrap><img src="<%= c.contributorImage %>" width="24"> <%= c.contributor %></td>
 	    <td><div><%- marked(c.message,{sanitize:true,gfm:true}) %></div><div><a href="<%= c.url %>"><%= c.date %></a></div></td>
