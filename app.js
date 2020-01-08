@@ -7,8 +7,19 @@ var NodeCache = require('node-cache');
 var marked = require('marked');
 
 var config = {
-	microsoftAccounts: require("./microsoft-github-accounts.json").accounts
+	microsoftAccounts: extractGithubAccountAliases( require("./microsoft-github-accounts.json") )
 };
+
+function extractGithubAccountAliases(json) {
+	if (Array.isArray( json.accounts[0] ) {
+		// New format checked in
+		return json.accounts.filter( (accountInfoArray) => accountInfoArray[0] );
+	}
+	else {
+		// Old format
+		return json.accounts;
+	}
+}
 
 if(process.env.GITHUB_TOKEN) {
 	config.githubToken = process.env.GITHUB_TOKEN;
