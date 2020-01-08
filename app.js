@@ -11,7 +11,7 @@ var config = {
 };
 
 function extractGithubAccountAliases(json) {
-	if (Array.isArray( json.accounts[0] ) {
+	if (Array.isArray( json.accounts[0] ) ) {
 		// New format checked in
 		return json.accounts.filter( (accountInfoArray) => accountInfoArray[0] );
 	}
