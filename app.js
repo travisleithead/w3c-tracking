@@ -11,14 +11,15 @@ var config = {
 };
 
 function extractGithubAccountAliases(json) {
-	if (Array.isArray( json.accounts[0] ) ) {
-		// New format checked in
-		return json.accounts.filter( (accountInfoArray) => accountInfoArray[0] );
-	}
-	else {
-		// Old format
-		return json.accounts;
-	}
+	return json.accounts.filter( (accountItem) => {
+		if ( Array.isArray( accountItem ) ) {
+			return accountItem[0]; // First item in the array shall be the Github alias
+		}
+		else {
+			// Assume it's a string (the Github alias)
+			return accountItem;
+		}
+	});
 }
 
 if(process.env.GITHUB_TOKEN) {
