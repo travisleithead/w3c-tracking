@@ -11,7 +11,7 @@ var config = {
 };
 
 function extractGithubAccountAliases(json) {
-	return json.accounts.filter( (accountItem) => {
+	return json.accounts.map( (accountItem) => {
 		if ( Array.isArray( accountItem ) ) {
 			return accountItem[0]; // First item in the array shall be the Github alias
 		}
